@@ -62,8 +62,6 @@ public class DoctorService {
         // Update non-null fields using Optional.ofNullable()
         Optional.ofNullable(updatedDoctor.getName()).ifPresent(existingDoctor::setName);
         Optional.ofNullable(updatedDoctor.getSpecialization()).ifPresent(existingDoctor::setSpecialization);
-        Optional.ofNullable(updatedDoctor.getEmail()).ifPresent(existingDoctor::setEmail);
-        Optional.ofNullable(updatedDoctor.getPhone()).ifPresent(existingDoctor::setPhone);
 
         return doctorRepository.save(existingDoctor);
     }

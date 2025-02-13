@@ -26,6 +26,7 @@ public class PermissionController {
     @PreAuthorize("hasAuthority('" + UserPermissions.WRITE_PERMISSIONS + "')")
     public ResponseEntity<String> createPermission(@RequestBody Permission permission) {
         return ResponseEntity.ok(permissionService.createPermission(permission));
+
     }
 
     // Get all permissions

@@ -7,6 +7,7 @@ import com.aashish.hospital_management_system.entity.Permission;
 import com.aashish.hospital_management_system.entity.User;
 import com.aashish.hospital_management_system.repository.UserRepository;
 import com.aashish.hospital_management_system.service.dto.request_dto.LoginDTO;
+import com.aashish.hospital_management_system.service.dto.response_dto.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -16,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -82,16 +84,20 @@ public class UserService {
     /**
      * Get a user by ID.
      */
-    public User getUserById(Integer id) {
-        return userRepository.findById(id)
+    public UserResponse getUserById(Integer id) {
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found"));
+        return new UserResponse(user);
     }
 
     /**
      * Get all users.
      */
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<UserResponse> getAllUsers() {
+        List<User> all = userRepository.findAll();
+        List<UserResponse> userResponse = new ArrayList<>();
+        all.forEach(user -> userResponse.add(new UserResponse(user)));
+        return userResponse;
     }
 
     /**

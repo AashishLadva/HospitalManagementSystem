@@ -32,10 +32,11 @@ public class JWTService {
         List<String> permissions = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .toList();
+        
 
         return Jwts.builder()
                 .subject(userDetails.getUsername()) // Set the subject (username)
-                .claim("permissions", permissions)  // Include permissions in the token
+                .claim("permissions", permissions)// Include permissions in the token
                 .issuedAt(new Date())              // Set the issue date
                 .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME)) // Set expiration
                 .signWith(SECRET_KEY)             // Sign the token with the secret key
@@ -62,10 +63,12 @@ public class JWTService {
      */
     public boolean validateToken(String token) {
         try {
-            extractClaims(token); // Attempt to parse the token
-            return true;          // If parsing succeeds, the token is valid
+            Claims claims = extractClaims(token); // Extract claims
+
+            // Check if the token is expired
+            return !claims.getExpiration().before(new Date());
         } catch (Exception e) {
-            return false;         // If an exception occurs, the token is invalid
+            return false; // Invalid token
         }
     }
 

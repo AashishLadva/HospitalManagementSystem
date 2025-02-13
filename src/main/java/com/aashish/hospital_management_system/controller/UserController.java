@@ -4,6 +4,7 @@ import com.aashish.hospital_management_system.constants.UserPermissions;
 import com.aashish.hospital_management_system.entity.User;
 import com.aashish.hospital_management_system.service.UserService;
 import com.aashish.hospital_management_system.service.dto.request_dto.LoginDTO;
+import com.aashish.hospital_management_system.service.dto.response_dto.UserResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -39,16 +40,14 @@ public class UserController {
     // Get a user by ID (Accessible to users with 'view_user' permission)
     @GetMapping("/{id}/getUser")
     @PreAuthorize("hasAuthority('" + UserPermissions.READ_USER + "') or hasAuthority('" + UserPermissions.READ_ALL_USERS + "')")
-    public ResponseEntity<User> getUserById(@PathVariable Integer id) {
-        User user = userService.getUserById(id);
-        return ResponseEntity.ok(user);
+    public ResponseEntity<UserResponse> getUserById(@PathVariable Integer id) {
+        return ResponseEntity.ok(userService.getUserById(id));
     }
 
     // Get all users (Accessible to users with 'view_all_users' permission)
     @GetMapping("/getAllUsers")
     @PreAuthorize("hasAuthority('" + UserPermissions.READ_ALL_USERS + "')")
-    public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userService.getAllUsers();
-        return ResponseEntity.ok(users);
+    public ResponseEntity<List<UserResponse>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
     }
 }

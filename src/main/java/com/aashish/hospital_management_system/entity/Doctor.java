@@ -21,9 +21,4 @@ public class Doctor {
     @Column(name = "specialization")
     private String specialization;
 
-    @Column(name = "email")
-    private String email;
-
-    @Column(name = "phone")
-    private Long phone;
 }

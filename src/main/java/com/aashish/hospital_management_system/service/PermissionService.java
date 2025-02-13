@@ -5,6 +5,7 @@ import com.aashish.hospital_management_system.configuration.exception.NotFoundEx
 import com.aashish.hospital_management_system.constants.ExceptionCommonMessages;
 import com.aashish.hospital_management_system.entity.Permission;
 import com.aashish.hospital_management_system.repository.PermissionRepository;
+import com.aashish.hospital_management_system.service.dto.RolePermissionDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +17,7 @@ import java.util.List;
 public class PermissionService {
 
     private final PermissionRepository permissionRepository;
+    private final RolePermissionService rolePermissionService;
 
     // Create a new permission
     @Transactional
@@ -26,10 +28,23 @@ public class PermissionService {
         if (permissionRepository.existsByName(permission.getName())) {
             throw new BadRequestException("Permission with the same name already exists");
         }
-        permissionRepository.save(permission);
+
+        // Save permission first
+        permissionRepository.saveAndFlush(permission); // Ensures the entity is saved before querying
+
+        // Fetch the newly saved permission
+        Permission savedPermission = permissionRepository.findByName(permission.getName())
+                .orElseThrow(() -> new NotFoundException("Permission not found"));
+
+        // Assign to Super Admin (Role ID 1)
+        RolePermissionDTO dto = new RolePermissionDTO();
+        dto.setPermissionId(savedPermission.getId());
+        dto.setRoleId(1);
+        rolePermissionService.addRolePermission(dto);
 
         return "Permission created successfully";
     }
+
 
     // Get all permissions
     @Transactional(readOnly = true)

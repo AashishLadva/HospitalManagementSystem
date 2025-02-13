@@ -20,6 +20,12 @@ public class User {
     @Column(name = "password", nullable = false)
     private String password;
 
+    @Column(name = "email")
+    private String email;
+
+    @Column(name = "phone")
+    private String phone;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_roles",
@@ -29,8 +35,12 @@ public class User {
     private Set<Role> roles;
 
     public Set<String> getRoleNames() {
+        if (this.roles == null) {
+            return Set.of(); // Return an empty set instead of throwing NullPointerException
+        }
         return this.roles.stream()
                 .map(Role::getName)
                 .collect(Collectors.toSet());
     }
+
 }

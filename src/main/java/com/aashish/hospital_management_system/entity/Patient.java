@@ -20,12 +20,6 @@ public class Patient {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "email")
-    private String email;
-
-    @Column(name = "phone")
-    private Long phone;
-
     @Column(name = "dob")
     private LocalDate dob;
 

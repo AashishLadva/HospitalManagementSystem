@@ -75,8 +75,6 @@ public class PatientService {
 
         // Update non-null fields using Optional.ofNullable()
         Optional.ofNullable(updatedPatient.getName()).ifPresent(existingPatient::setName);
-        Optional.ofNullable(updatedPatient.getEmail()).ifPresent(existingPatient::setEmail);
-        Optional.ofNullable(updatedPatient.getPhone()).ifPresent(existingPatient::setPhone);
         Optional.ofNullable(updatedPatient.getDob()).ifPresent(existingPatient::setDob);
         Optional.ofNullable(updatedPatient.getAddress()).ifPresent(existingPatient::setAddress);
 
