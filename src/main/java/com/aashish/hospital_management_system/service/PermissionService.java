@@ -1,0 +1,72 @@
+package com.aashish.hospital_management_system.service;
+
+import com.aashish.hospital_management_system.configuration.exception.BadRequestException;
+import com.aashish.hospital_management_system.configuration.exception.NotFoundException;
+import com.aashish.hospital_management_system.constants.ExceptionCommonMessages;
+import com.aashish.hospital_management_system.entity.Permission;
+import com.aashish.hospital_management_system.repository.PermissionRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class PermissionService {
+
+    private final PermissionRepository permissionRepository;
+
+    // Create a new permission
+    @Transactional
+    public String createPermission(Permission permission) {
+        if (permission == null || permission.getName() == null || permission.getName().trim().isEmpty()) {
+            throw new BadRequestException("Permission name cannot be null or empty");
+        }
+        if (permissionRepository.existsByName(permission.getName())) {
+            throw new BadRequestException("Permission with the same name already exists");
+        }
+        permissionRepository.save(permission);
+
+        return "Permission created successfully";
+    }
+
+    // Get all permissions
+    @Transactional(readOnly = true)
+    public List<Permission> getAllPermissions() {
+        return permissionRepository.findAll();
+    }
+
+    // Get a permission by ID
+    @Transactional(readOnly = true)
+    public Permission getPermissionById(Integer id) {
+        return permissionRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(ExceptionCommonMessages.PERMISSION_NOT_FOUND));
+    }
+
+    // Update a permission
+    @Transactional
+    public String updatePermission(Integer id, Permission updatedPermission) {
+        if (updatedPermission == null || updatedPermission.getName() == null || updatedPermission.getName().trim().isEmpty()) {
+            throw new BadRequestException("Permission name cannot be null or empty");
+        }
+        Permission existingPermission = permissionRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(ExceptionCommonMessages.PERMISSION_NOT_FOUND));
+
+        existingPermission.setName(updatedPermission.getName());
+        permissionRepository.save(existingPermission);
+
+        return "Permission updated successfully.";
+    }
+
+    // Delete a permission by ID
+    @Transactional
+    public String deletePermission(Integer id) {
+        if (!permissionRepository.existsById(id)) {
+            throw new NotFoundException(ExceptionCommonMessages.PERMISSION_NOT_FOUND);
+        }
+
+        permissionRepository.deleteById(id);
+        return "Permission deleted successfully";
+    }
+}
