@@ -21,21 +21,21 @@ public class UserRoleController {
     }
 
     // Add a user-role mapping
-    @PostMapping
+    @PostMapping("/add-UserRole")
     @PreAuthorize("hasAuthority('" + UserPermissions.WRITE_USER_ROLES + "')")
     public ResponseEntity<String> addUserRole(@RequestBody UserRoleDTO dto) {
         return ResponseEntity.ok(userRoleService.addUserRole(dto));
     }
 
     // Get all user-role mappings
-    @GetMapping
+    @GetMapping("getAllUserRoles")
     @PreAuthorize("hasAuthority('" + UserPermissions.READ_ALL_USER_ROLES + "')")
     public ResponseEntity<List<UserRoleDTO>> getAllUserRoles() {
         return ResponseEntity.ok(userRoleService.getAllUserRoles());
     }
 
     // Delete a user-role mapping
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id}/deleteUserRole")
     @PreAuthorize("hasAuthority('" + UserPermissions.WRITE_USER_ROLES + "')")
     public ResponseEntity<String> deleteUserRole(@PathVariable Integer id, @RequestBody Set<Integer> roleIds) {
 

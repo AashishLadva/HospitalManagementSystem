@@ -2,7 +2,7 @@ package com.aashish.hospital_management_system.controller;
 
 import com.aashish.hospital_management_system.constants.UserPermissions;
 import com.aashish.hospital_management_system.service.RolePermissionService;
-import com.aashish.hospital_management_system.service.dto.RolePermissionDTO;
+import com.aashish.hospital_management_system.service.dto.request.RolePermissionDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -27,14 +27,15 @@ public class RolePermissionController {
     }
 
     // Get all role-permission mappings
-    @GetMapping
+    @GetMapping("/getAllRolePermissions")
     @PreAuthorize("hasAuthority('" + UserPermissions.READ_ALL_ROLES_PERMISSIONS + "')")
     public ResponseEntity<List<RolePermissionDTO>> getAllRolePermissions() {
         return ResponseEntity.ok(rolePermissionService.getAllRolePermissions());
     }
 
+
     // Delete a role-permission mapping
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id}/delete-role-permission")
     @PreAuthorize("hasAuthority('" + UserPermissions.WRITE_ROLES_PERMISSIONS + "')")
     public ResponseEntity<String> deleteRolePermission(@PathVariable Integer id) {
         return ResponseEntity.ok(rolePermissionService.deleteRolePermission(id));

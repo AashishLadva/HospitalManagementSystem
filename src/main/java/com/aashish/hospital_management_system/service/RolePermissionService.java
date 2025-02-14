@@ -7,9 +7,10 @@ import com.aashish.hospital_management_system.entity.RolePermission;
 import com.aashish.hospital_management_system.repository.PermissionRepository;
 import com.aashish.hospital_management_system.repository.RolePermissionRepository;
 import com.aashish.hospital_management_system.repository.RoleRepository;
-import com.aashish.hospital_management_system.service.dto.RolePermissionDTO;
+import com.aashish.hospital_management_system.service.dto.request.RolePermissionDTO;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,13 +46,14 @@ public class RolePermissionService {
 
     // Get all role-permission mappings
     public List<RolePermissionDTO> getAllRolePermissions() {
-        return rolePermissionRepository.findAll().stream().map(rolePermission -> {
-            RolePermissionDTO dto = new RolePermissionDTO();
-            dto.setRoleId(rolePermission.getRole().getId());
-            dto.setPermissionId(rolePermission.getPermission().getId());
-            return dto;
-        }).toList();
+        List<RolePermissionDTO> list = new ArrayList<>();
+        for (RolePermission permission : rolePermissionRepository.findAll()) {
+            RolePermissionDTO dto = new RolePermissionDTO(permission.getRole().getId(), permission.getPermission().getId());
+            list.add(dto);
+        }
+        return list;
     }
+
 
     // Delete a role-permission mapping
     public String deleteRolePermission(Integer id) {

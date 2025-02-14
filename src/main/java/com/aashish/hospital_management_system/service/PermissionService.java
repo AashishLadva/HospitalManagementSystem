@@ -5,7 +5,7 @@ import com.aashish.hospital_management_system.configuration.exception.NotFoundEx
 import com.aashish.hospital_management_system.constants.ExceptionCommonMessages;
 import com.aashish.hospital_management_system.entity.Permission;
 import com.aashish.hospital_management_system.repository.PermissionRepository;
-import com.aashish.hospital_management_system.service.dto.RolePermissionDTO;
+import com.aashish.hospital_management_system.service.dto.request.RolePermissionDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,9 +37,7 @@ public class PermissionService {
                 .orElseThrow(() -> new NotFoundException("Permission not found"));
 
         // Assign to Super Admin (Role ID 1)
-        RolePermissionDTO dto = new RolePermissionDTO();
-        dto.setPermissionId(savedPermission.getId());
-        dto.setRoleId(1);
+        RolePermissionDTO dto = new RolePermissionDTO(1, savedPermission.getId());
         rolePermissionService.addRolePermission(dto);
 
         return "Permission created successfully";
