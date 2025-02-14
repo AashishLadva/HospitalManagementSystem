@@ -1,5 +1,6 @@
 package com.aashish.hospital_management_system.service.impl;
 
+import com.aashish.hospital_management_system.configuration.CustomUserDetails;
 import com.aashish.hospital_management_system.entity.User;
 import com.aashish.hospital_management_system.repository.UserRepository;
 import org.springframework.security.core.GrantedAuthority;
@@ -27,17 +28,12 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         Set<GrantedAuthority> authorities = new HashSet<>();
-
         user.getRoles().forEach(role -> {
             authorities.add(new SimpleGrantedAuthority(role.getName())); // Add ROLE
             role.getPermissions().forEach(permission ->
                     authorities.add(new SimpleGrantedAuthority(permission.getName()))); // Add Permissions
         });
 
-        return new org.springframework.security.core.userdetails.User(
-                user.getUsername(),
-                user.getPassword(),
-                authorities
-        );
+        return new CustomUserDetails(user, authorities);
     }
 }

@@ -9,12 +9,13 @@ import com.aashish.hospital_management_system.entity.Patient;
 import com.aashish.hospital_management_system.repository.AppointmentRepository;
 import com.aashish.hospital_management_system.repository.DoctorRepository;
 import com.aashish.hospital_management_system.repository.PatientRepository;
-import com.aashish.hospital_management_system.service.dto.response_dto.AppointmentDTO;
+import com.aashish.hospital_management_system.service.dto.AppointmentDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -27,28 +28,32 @@ public class AppointmentService {
 
     // Book an appointment
     @Transactional
-    public String bookAppointment(Appointment appointment) {
-        if (appointment == null) {
+    public String bookAppointment(AppointmentDTO appointmentDTO) {
+        if (appointmentDTO == null) {
             throw new BadRequestException("Appointment object is null");
         }
-        if (appointment.getAppointmentDate() == null) {
-            appointment.setAppointmentDate(LocalDate.now());
+        if (appointmentDTO.getAppointmentDate() == null) {
+            appointmentDTO.setAppointmentDate(LocalDate.now());
         }
 
         // Validate Patient and Doctor existence
-        Patient patient = patientRepository.findById(appointment.getPatient().getId())
+        Patient patient = patientRepository.findById(appointmentDTO.getPatientId())
                 .orElseThrow(() -> new NotFoundException(ExceptionCommonMessages.PATIENT_NOT_FOUND));
-        Doctor doctor = doctorRepository.findById(appointment.getDoctor().getId())
+        Doctor doctor = doctorRepository.findById(appointmentDTO.getDoctorId())
                 .orElseThrow(() -> new NotFoundException(ExceptionCommonMessages.DOCTOR_NOT_FOUND));
 
         // Check if appointment already exists
         boolean isBooked = appointmentRepository.existsByPatientAndDoctorAndAppointmentDate(
-                patient, doctor, appointment.getAppointmentDate());
+                patient, doctor, appointmentDTO.getAppointmentDate());
         if (isBooked) {
             throw new BadRequestException("Appointment is already booked.");
         }
 
+        Appointment appointment = new Appointment();
+        appointment.setAppointmentDate(appointmentDTO.getAppointmentDate());
         appointment.setStatus(Appointment.Status.PENDING);
+        appointment.setDoctor(doctor);
+        appointment.setPatient(patient);
         appointmentRepository.save(appointment);
         return "Appointment booked successfully.";
     }
@@ -56,38 +61,22 @@ public class AppointmentService {
     // Get all appointments
     @Transactional(readOnly = true)
     public List<AppointmentDTO> getAllAppointments() {
-        return appointmentRepository.findAll().stream()
-                .map(appointment -> new AppointmentDTO(
-                        appointment.getId(),
-                        appointment.getPatient().getId(),
-                        appointment.getDoctor().getId(),
-                        appointment.getAppointmentDate(),
-                        appointment.getStatus(),
-                        appointment.getDoctor().getName(),
-                        appointment.getPatient().getName()
-                ))
-                .toList();
+        List<Appointment> allAppointments = appointmentRepository.findAll();
+        List<AppointmentDTO> appointmentDTOS = new ArrayList<>();
+        allAppointments.forEach(appointment -> appointmentDTOS.add(new AppointmentDTO(appointment)));
+        return appointmentDTOS;
     }
 
     // Get appointments by patient ID
     @Transactional(readOnly = true)
     public List<AppointmentDTO> getAppointmentsByPatientId(Integer patientId) {
-        List<Appointment> appointments = appointmentRepository.findAllByPatientId(patientId);
-        if (appointments.isEmpty()) {
+        List<Appointment> allAppointments = appointmentRepository.findAllByPatientId(patientId);
+        if (allAppointments.isEmpty()) {
             throw new NotFoundException(ExceptionCommonMessages.APPOINTMENT_NOT_FOUND);
         }
-
-        return appointments.stream()
-                .map(appointment -> new AppointmentDTO(
-                        appointment.getId(),
-                        appointment.getPatient().getId(),
-                        appointment.getDoctor().getId(),
-                        appointment.getAppointmentDate(),
-                        appointment.getStatus(),
-                        appointment.getDoctor().getName(),
-                        appointment.getPatient().getName()
-                ))
-                .toList();
+        List<AppointmentDTO> appointmentDTOS = new ArrayList<>();
+        allAppointments.forEach(appointment -> appointmentDTOS.add(new AppointmentDTO(appointment)));
+        return appointmentDTOS;
     }
 
     // Approve an appointment

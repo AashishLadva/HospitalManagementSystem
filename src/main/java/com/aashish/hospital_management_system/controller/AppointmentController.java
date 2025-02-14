@@ -1,9 +1,8 @@
 package com.aashish.hospital_management_system.controller;
 
 import com.aashish.hospital_management_system.constants.UserPermissions;
-import com.aashish.hospital_management_system.entity.Appointment;
 import com.aashish.hospital_management_system.service.AppointmentService;
-import com.aashish.hospital_management_system.service.dto.response_dto.AppointmentDTO;
+import com.aashish.hospital_management_system.service.dto.AppointmentDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,7 +24,7 @@ public class AppointmentController {
     // Book an appointment (Only users with 'book_appointment' permission can book appointments)
     @PostMapping("/bookAppointment")
     @PreAuthorize("hasAuthority('" + UserPermissions.WRITE_APPOINTMENT + "')")
-    public ResponseEntity<String> bookAppointment(@RequestBody Appointment appointment) {
+    public ResponseEntity<String> bookAppointment(@RequestBody AppointmentDTO appointment) {
         String bookedAppointment = appointmentService.bookAppointment(appointment);
         return ResponseEntity.ok(bookedAppointment);
     }

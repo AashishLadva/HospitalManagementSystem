@@ -1,8 +1,8 @@
 package com.aashish.hospital_management_system.controller;
 
 import com.aashish.hospital_management_system.constants.UserPermissions;
-import com.aashish.hospital_management_system.entity.Patient;
 import com.aashish.hospital_management_system.service.PatientService;
+import com.aashish.hospital_management_system.service.dto.PatientDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,7 +24,7 @@ public class PatientController {
     // Add a new patient (Only users with 'add_patient' permission can add patients)
     @PostMapping("/addPatient")
     @PreAuthorize("hasAuthority('" + UserPermissions.WRITE_PATIENTS + "')")
-    public ResponseEntity<String> addPatient(@RequestBody Patient patient) {
+    public ResponseEntity<String> addPatient(@RequestBody PatientDTO patient) {
         String savedPatient = patientService.addPatient(patient);
         return ResponseEntity.ok(savedPatient);
     }
@@ -32,17 +32,15 @@ public class PatientController {
     // Get a patient by ID (Accessible to users with 'view_own_patient' or 'view_all_patients' permission)
     @GetMapping("/{id}/getPatient")
     @PreAuthorize("hasAuthority('" + UserPermissions.READ_OWN_PATIENTS + "') or hasAuthority('" + UserPermissions.READ_ALL_PATIENTS + "')")
-    public ResponseEntity<Patient> getPatientById(@PathVariable Integer id) {
-        Patient patient = patientService.getPatientById(id);
-        return ResponseEntity.ok(patient);
+    public ResponseEntity<PatientDTO> getPatientById(@PathVariable Integer id) {
+        return ResponseEntity.ok(patientService.getPatientById(id));
     }
 
     // Get all patients (Accessible to users with 'view_all_patients' permission)
     @GetMapping("/getAllPatients")
     @PreAuthorize("hasAuthority('" + UserPermissions.READ_ALL_PATIENTS + "')")
-    public ResponseEntity<List<Patient>> getAllPatients() {
-        List<Patient> patients = (List<Patient>) patientService.getAllPatients();
-        return ResponseEntity.ok(patients);
+    public ResponseEntity<List<PatientDTO>> getAllPatients() {
+        return ResponseEntity.ok(patientService.getAllPatients());
     }
 
     // Remove a patient by ID (Only users with 'delete_patient' permission can remove patients)
@@ -56,7 +54,7 @@ public class PatientController {
     // Update a patient (Only users with 'update_own_patient' or 'update_all_patients' permission can update it)
     @PutMapping("/{id}/updatePatient")
     @PreAuthorize("hasAuthority('" + UserPermissions.WRITE_OWN_PATIENTS + "') or hasAuthority('" + UserPermissions.WRITE_PATIENTS + "')")
-    public ResponseEntity<String> updatePatient(@PathVariable Integer id, @RequestBody Patient patient) {
+    public ResponseEntity<String> updatePatient(@PathVariable Integer id, @RequestBody PatientDTO patient) {
         String updatedPatient = patientService.updatePatient(id, patient);
         return ResponseEntity.ok(updatedPatient);
     }

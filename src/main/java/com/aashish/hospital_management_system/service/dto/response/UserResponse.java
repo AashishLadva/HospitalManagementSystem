@@ -1,4 +1,4 @@
-package com.aashish.hospital_management_system.service.dto.response_dto;
+package com.aashish.hospital_management_system.service.dto.response;
 
 import com.aashish.hospital_management_system.entity.User;
 import lombok.Data;

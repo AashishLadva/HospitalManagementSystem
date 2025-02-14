@@ -6,79 +6,72 @@ import com.aashish.hospital_management_system.configuration.exception.Unauthoriz
 import com.aashish.hospital_management_system.entity.Permission;
 import com.aashish.hospital_management_system.entity.User;
 import com.aashish.hospital_management_system.repository.UserRepository;
-import com.aashish.hospital_management_system.service.dto.request_dto.LoginDTO;
-import com.aashish.hospital_management_system.service.dto.response_dto.UserResponse;
+import com.aashish.hospital_management_system.service.dto.request.LoginDTO;
+import com.aashish.hospital_management_system.service.dto.response.UserResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JWTService jwtService;
 
+    /**
+     * Register a new user.
+     */
     @Transactional
     public User registerUser(User user) {
         if (user == null || isNullOrEmpty(user.getUsername()) || isNullOrEmpty(user.getPassword())) {
-            throw new BadRequestException("Username and password are required");
+            throw new BadRequestException("Username and password are required.");
         }
         if (userRepository.existsByUsername(user.getUsername())) {
-            throw new BadRequestException("Username already taken");
+            throw new BadRequestException("Username '" + user.getUsername() + "' is already taken.");
         }
-        // Encode the password before saving
+
+        // Encode password before saving
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        log.info("User '{}' registered successfully.", user.getUsername());
         return userRepository.save(user);
     }
 
     /**
-     * Authenticate a user and generate a JWT token.
+     * Authenticate user and generate JWT token.
      */
+    @Transactional
     public String loginUser(LoginDTO loginDTO) {
-        // Validate input
         if (isNullOrEmpty(loginDTO.getUsername()) || isNullOrEmpty(loginDTO.getPassword())) {
-            throw new BadRequestException("Username and password are required");
+            throw new BadRequestException("Username and password are required.");
         }
 
         // Retrieve user by username
         User user = userRepository.findByUsername(loginDTO.getUsername())
-                .orElseThrow(() -> new UnauthorizedException("Invalid username or password"));
+                .orElseThrow(() -> new UnauthorizedException("Invalid username or password."));
 
-        // Validate credentials
-        validateUserCredentials(loginDTO.getPassword(), user.getPassword());
+        // Validate password
+        if (!passwordEncoder.matches(loginDTO.getPassword(), user.getPassword())) {
+            log.warn("Failed login attempt for user '{}'.", loginDTO.getUsername());
+            throw new UnauthorizedException("Invalid username or password.");
+        }
 
         // Extract roles and permissions
         List<String> permissions = user.getRoles().stream()
-                .flatMap(role -> role.getPermissions().stream()) // Flatten permissions from all roles
+                .flatMap(role -> role.getPermissions().stream())
                 .map(Permission::getName)
                 .toList();
 
-        // Generate and return JWT token
-        return jwtService.generateToken(createAuthentication(user.getUsername(), permissions));
-    }
+        log.info("User '{}' logged in successfully.", loginDTO.getUsername());
 
-    /**
-     * Helper method to create an Authentication object for the user.
-     */
-    private Authentication createAuthentication(String username, List<String> permissions) {
-        UserDetails userDetails = org.springframework.security.core.userdetails.User
-                .withUsername(username)
-                .password("") // Password is not needed here since authentication is already validated
-                .authorities(permissions.stream()
-                        .map(SimpleGrantedAuthority::new)
-                        .toList())
-                .build();
-        return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        // Generate and return JWT token
+        return jwtService.generateToken(user.getUsername(), permissions, user.getEmail());
     }
 
     /**
@@ -86,7 +79,7 @@ public class UserService {
      */
     public UserResponse getUserById(Integer id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User not found with ID: " + id));
         return new UserResponse(user);
     }
 
@@ -94,19 +87,10 @@ public class UserService {
      * Get all users.
      */
     public List<UserResponse> getAllUsers() {
-        List<User> all = userRepository.findAll();
-        List<UserResponse> userResponse = new ArrayList<>();
-        all.forEach(user -> userResponse.add(new UserResponse(user)));
-        return userResponse;
-    }
-
-    /**
-     * Validate user credentials.
-     */
-    private void validateUserCredentials(String rawPassword, String encodedPassword) {
-        if (!passwordEncoder.matches(rawPassword, encodedPassword)) {
-            throw new UnauthorizedException("Invalid username or password");
-        }
+        return userRepository.findAll()
+                .stream()
+                .map(UserResponse::new)
+                .toList();
     }
 
     /**

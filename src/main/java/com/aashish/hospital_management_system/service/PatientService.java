@@ -7,10 +7,13 @@ import com.aashish.hospital_management_system.entity.Patient;
 import com.aashish.hospital_management_system.entity.User;
 import com.aashish.hospital_management_system.repository.PatientRepository;
 import com.aashish.hospital_management_system.repository.UserRepository;
+import com.aashish.hospital_management_system.service.dto.PatientDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -22,17 +25,23 @@ public class PatientService {
 
     // Add a new patient
     @Transactional
-    public String addPatient(Patient patient) {
-        if (patient == null || patient.getUser() == null || patient.getUser().getId() == null) {
+    public String addPatient(PatientDTO patientDTO) {
+        if (patientDTO == null || patientDTO.getUserId() == null) {
             throw new BadRequestException("Invalid patient object or missing user ID.");
         }
 
-        User user = userRepository.findById(patient.getUser().getId())
+        User user = userRepository.findById(patientDTO.getUserId())
                 .orElseThrow(() -> new NotFoundException("User with given ID does not exist"));
 
-        if (!user.getRoleNames().contains("PATIENT")) {
-            throw new BadRequestException("User does not have the 'PATIENT' role");
+        if (!user.getRoleNames().contains("ROLE_PATIENT")) {
+            throw new BadRequestException("User does not have the 'ROLE_PATIENT' role");
         }
+        Patient patient = new Patient();
+
+        patient.setDob(patientDTO.getDob());
+        patient.setName(patientDTO.getName());
+        patient.setAddress(patientDTO.getAddress());
+        patient.setUser(user);
 
         patientRepository.save(patient);
 
@@ -41,15 +50,19 @@ public class PatientService {
 
     // Get a patient by ID
     @Transactional(readOnly = true)
-    public Patient getPatientById(Integer id) {
-        return patientRepository.findById(id)
+    public PatientDTO getPatientById(Integer id) {
+        Patient patient = patientRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(ExceptionCommonMessages.PATIENT_NOT_FOUND));
+        return new PatientDTO(patient);
     }
 
     // Get all patients
     @Transactional(readOnly = true)
-    public Iterable<Patient> getAllPatients() {
-        return patientRepository.findAll();
+    public List<PatientDTO> getAllPatients() {
+        List<Patient> allPatients = patientRepository.findAll();
+        List<PatientDTO> patientDTOs = new ArrayList<>();
+        allPatients.forEach(patientDTO -> patientDTOs.add(new PatientDTO(patientDTO)));
+        return patientDTOs;
     }
 
     // Remove a patient by ID
@@ -65,7 +78,7 @@ public class PatientService {
 
     // Update a patient's details
     @Transactional
-    public String updatePatient(Integer id, Patient updatedPatient) {
+    public String updatePatient(Integer id, PatientDTO updatedPatient) {
         if (updatedPatient == null) {
             throw new BadRequestException("Patient object is null");
         }

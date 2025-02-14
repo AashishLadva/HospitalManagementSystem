@@ -1,4 +1,4 @@
-package com.aashish.hospital_management_system.service.dto.request_dto;
+package com.aashish.hospital_management_system.service.dto.request;
 
 import lombok.Data;
 
