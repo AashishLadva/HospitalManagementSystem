@@ -4,13 +4,14 @@ import com.aashish.hospital_management_system.constants.UserPermissions;
 import com.aashish.hospital_management_system.entity.User;
 import com.aashish.hospital_management_system.service.UserService;
 import com.aashish.hospital_management_system.service.dto.request.LoginDTO;
+import com.aashish.hospital_management_system.service.dto.response.PaginatedResponse;
 import com.aashish.hospital_management_system.service.dto.response.UserResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
@@ -47,7 +48,8 @@ public class UserController {
     // Get all users (Accessible to users with 'view_all_users' permission)
     @GetMapping("/getAllUsers")
     @PreAuthorize("hasAuthority('" + UserPermissions.READ_ALL_USERS + "')")
-    public ResponseEntity<List<UserResponse>> getAllUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
+    public ResponseEntity<PaginatedResponse<UserResponse>> getAllUsers(
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(userService.getAllUsers(pageable));
     }
 }

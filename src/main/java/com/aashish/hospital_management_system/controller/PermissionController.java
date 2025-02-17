@@ -3,12 +3,13 @@ package com.aashish.hospital_management_system.controller;
 import com.aashish.hospital_management_system.constants.UserPermissions;
 import com.aashish.hospital_management_system.entity.Permission;
 import com.aashish.hospital_management_system.service.PermissionService;
+import com.aashish.hospital_management_system.service.dto.response.PaginatedResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/permissions")
@@ -32,8 +33,9 @@ public class PermissionController {
     // Get all permissions
     @GetMapping("/all")
     @PreAuthorize("hasAuthority('" + UserPermissions.READ_ALL_PERMISSIONS + "')")
-    public ResponseEntity<List<Permission>> getAllPermissions() {
-        return ResponseEntity.ok(permissionService.getAllPermissions());
+    public ResponseEntity<PaginatedResponse<Permission>> getAllPermissions(
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(permissionService.getAllPermissions(pageable));
     }
 
     // Get a permission by ID

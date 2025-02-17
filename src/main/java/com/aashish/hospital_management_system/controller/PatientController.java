@@ -3,12 +3,13 @@ package com.aashish.hospital_management_system.controller;
 import com.aashish.hospital_management_system.constants.UserPermissions;
 import com.aashish.hospital_management_system.service.PatientService;
 import com.aashish.hospital_management_system.service.dto.PatientDTO;
+import com.aashish.hospital_management_system.service.dto.response.PaginatedResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/patients")
@@ -30,17 +31,18 @@ public class PatientController {
     }
 
     // Get a patient by ID (Accessible to users with 'view_own_patient' or 'view_all_patients' permission)
-    @GetMapping("/{id}/getPatient")
+    @GetMapping("/{patientId}/getPatient")
     @PreAuthorize("hasAuthority('" + UserPermissions.READ_OWN_PATIENTS + "') or hasAuthority('" + UserPermissions.READ_ALL_PATIENTS + "')")
-    public ResponseEntity<PatientDTO> getPatientById(@PathVariable Integer id) {
-        return ResponseEntity.ok(patientService.getPatientById(id));
+    public ResponseEntity<PatientDTO> getPatientById(@PathVariable Integer patientId) {
+        return ResponseEntity.ok(patientService.getPatientById(patientId));
     }
 
     // Get all patients (Accessible to users with 'view_all_patients' permission)
     @GetMapping("/getAllPatients")
     @PreAuthorize("hasAuthority('" + UserPermissions.READ_ALL_PATIENTS + "')")
-    public ResponseEntity<List<PatientDTO>> getAllPatients() {
-        return ResponseEntity.ok(patientService.getAllPatients());
+    public ResponseEntity<PaginatedResponse<PatientDTO>> getAllPatients(
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(patientService.getAllPatients(pageable));
     }
 
     // Remove a patient by ID (Only users with 'delete_patient' permission can remove patients)

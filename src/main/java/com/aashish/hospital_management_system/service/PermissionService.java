@@ -6,11 +6,12 @@ import com.aashish.hospital_management_system.constants.ExceptionCommonMessages;
 import com.aashish.hospital_management_system.entity.Permission;
 import com.aashish.hospital_management_system.repository.PermissionRepository;
 import com.aashish.hospital_management_system.service.dto.request.RolePermissionDTO;
+import com.aashish.hospital_management_system.service.dto.response.PaginatedResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -46,8 +47,11 @@ public class PermissionService {
 
     // Get all permissions
     @Transactional(readOnly = true)
-    public List<Permission> getAllPermissions() {
-        return permissionRepository.findAll();
+    public PaginatedResponse<Permission> getAllPermissions(Pageable pageable) {
+        Page<Permission> permissionPage = permissionRepository.findAll(pageable); // Fetch paginated data
+
+        // Convert Page<Permission> to PaginatedResponse<Permission>
+        return PaginatedResponse.fromPage(permissionPage);
     }
 
     // Get a permission by ID

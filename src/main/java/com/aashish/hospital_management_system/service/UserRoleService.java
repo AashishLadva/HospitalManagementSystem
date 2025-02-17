@@ -8,7 +8,11 @@ import com.aashish.hospital_management_system.repository.RoleRepository;
 import com.aashish.hospital_management_system.repository.UserRepository;
 import com.aashish.hospital_management_system.repository.UserRoleRepository;
 import com.aashish.hospital_management_system.service.dto.UserRoleDTO;
+import com.aashish.hospital_management_system.service.dto.response.PaginatedResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -46,13 +50,14 @@ public class UserRoleService {
     }
 
     // Get all user-role mappings
-    public List<UserRoleDTO> getAllUserRoles() {
-        return userRoleRepository.findAll().stream().map(userRole -> {
-            UserRoleDTO dto = new UserRoleDTO();
-            dto.setUserId(userRole.getUser().getId());
-            dto.setRoleId(userRole.getRole().getId());
-            return dto;
-        }).collect(Collectors.toList());
+    @Transactional(readOnly = true)
+    public PaginatedResponse<UserRoleDTO> getAllUserRoles(Pageable pageable) {
+        Page<UserRole> userRolePage = userRoleRepository.findAll(pageable); // Fetch paginated data
+
+        // Convert Page<UserRole> to Page<UserRoleDTO>
+        Page<UserRoleDTO> userRoleDTOPage = userRolePage.map(UserRoleDTO::new);
+
+        return PaginatedResponse.fromPage(userRoleDTOPage);
     }
 
     // Delete a user-role mapping

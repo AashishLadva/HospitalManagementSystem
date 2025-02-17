@@ -7,7 +7,10 @@ import com.aashish.hospital_management_system.entity.Permission;
 import com.aashish.hospital_management_system.entity.Role;
 import com.aashish.hospital_management_system.repository.PermissionRepository;
 import com.aashish.hospital_management_system.repository.RoleRepository;
+import com.aashish.hospital_management_system.service.dto.response.PaginatedResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,8 +41,11 @@ public class RoleService {
 
     // Get all roles
     @Transactional(readOnly = true)
-    public List<Role> getAllRoles() {
-        return roleRepository.findAll();
+    public PaginatedResponse<Role> getAllRoles(Pageable pageable) {
+        Page<Role> rolePage = roleRepository.findAll(pageable); // Fetch paginated data
+
+        // Convert Page<Role> to PaginatedResponse<Role>
+        return PaginatedResponse.fromPage(rolePage);
     }
 
     // Get a role by ID

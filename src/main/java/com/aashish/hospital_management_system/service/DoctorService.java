@@ -8,12 +8,13 @@ import com.aashish.hospital_management_system.entity.User;
 import com.aashish.hospital_management_system.repository.DoctorRepository;
 import com.aashish.hospital_management_system.repository.UserRepository;
 import com.aashish.hospital_management_system.service.dto.DoctorDTO;
+import com.aashish.hospital_management_system.service.dto.response.PaginatedResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -48,12 +49,14 @@ public class DoctorService {
 
     // Get all doctors
     @Transactional(readOnly = true)
-    public List<DoctorDTO> getAllDoctors() {
-        List<Doctor> allDoctors = doctorRepository.findAll();
-        List<DoctorDTO> doctorDTOs = new ArrayList<>();
-        allDoctors.forEach(doctorDTO -> doctorDTOs.add(new DoctorDTO(doctorDTO)));
-        return doctorDTOs;
+    public PaginatedResponse<DoctorDTO> getAllDoctors(Pageable pageable) {
+        Page<Doctor> doctorPage = doctorRepository.findAll(pageable); // Fetch paginated data
+
+        Page<DoctorDTO> doctorDTOPage = doctorPage.map(DoctorDTO::new);
+
+        return PaginatedResponse.fromPage(doctorDTOPage);
     }
+
 
     // Update a doctor
     @Transactional

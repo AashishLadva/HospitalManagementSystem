@@ -7,9 +7,12 @@ import com.aashish.hospital_management_system.entity.Permission;
 import com.aashish.hospital_management_system.entity.User;
 import com.aashish.hospital_management_system.repository.UserRepository;
 import com.aashish.hospital_management_system.service.dto.request.LoginDTO;
+import com.aashish.hospital_management_system.service.dto.response.PaginatedResponse;
 import com.aashish.hospital_management_system.service.dto.response.UserResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -86,11 +89,14 @@ public class UserService {
     /**
      * Get all users.
      */
-    public List<UserResponse> getAllUsers() {
-        return userRepository.findAll()
-                .stream()
-                .map(UserResponse::new)
-                .toList();
+    @Transactional(readOnly = true)
+    public PaginatedResponse<UserResponse> getAllUsers(Pageable pageable) {
+        Page<User> userPage = userRepository.findAll(pageable); // Fetch paginated data
+
+        // Convert Page<User> to Page<UserResponse> DTO
+        Page<UserResponse> userResponsePage = userPage.map(UserResponse::new);
+
+        return PaginatedResponse.fromPage(userResponsePage);
     }
 
     /**

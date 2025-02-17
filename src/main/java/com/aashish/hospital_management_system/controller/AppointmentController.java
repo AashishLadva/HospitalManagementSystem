@@ -3,12 +3,14 @@ package com.aashish.hospital_management_system.controller;
 import com.aashish.hospital_management_system.constants.UserPermissions;
 import com.aashish.hospital_management_system.service.AppointmentService;
 import com.aashish.hospital_management_system.service.dto.AppointmentDTO;
+import com.aashish.hospital_management_system.service.dto.response.PaginatedResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/appointments")
@@ -29,20 +31,21 @@ public class AppointmentController {
         return ResponseEntity.ok(bookedAppointment);
     }
 
-    // Get all appointments (Accessible to users with 'view_all_appointments' permission)
     @GetMapping("/getAllAppointments")
     @PreAuthorize("hasAuthority('" + UserPermissions.READ_ALL_APPOINTMENTS + "')")
-    public ResponseEntity<List<AppointmentDTO>> getAllAppointments() {
-        List<AppointmentDTO> appointments = appointmentService.getAllAppointments();
-        return ResponseEntity.ok(appointments);
+    public PaginatedResponse<AppointmentDTO> getAllAppointments(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return appointmentService.getAllAppointments(pageable);
     }
 
-    // Get an appointment by patient ID (Accessible to users with 'view_own_appointment' or 'view_all_appointments' permission)
-    @GetMapping("/{id}/getAppointment")
-    @PreAuthorize("hasAuthority('" + UserPermissions.READ_OWN_APPOINTMENT + "') or hasAuthority('" + UserPermissions.READ_ALL_APPOINTMENTS + "')")
-    public ResponseEntity<List<AppointmentDTO>> getAppointmentByPatientId(@PathVariable Integer id) {
-        List<AppointmentDTO> appointment = appointmentService.getAppointmentsByPatientId(id);
-        return ResponseEntity.ok(appointment);
+    @GetMapping("/{patientId}/getAppointment")
+    @PreAuthorize("hasAuthority('" + UserPermissions.READ_ALL_APPOINTMENTS + "') or hasAuthority('" + UserPermissions.READ_OWN_APPOINTMENT + "')")
+    public PaginatedResponse<AppointmentDTO> getAppointmentsByPatientId(
+            @PathVariable Integer patientId,
+            @PageableDefault Pageable pageable) {
+        return appointmentService.getAppointmentsByPatientId(patientId, pageable);
     }
 
     // Approve an appointment (Only users with 'approve_appointment' permission can approve appointments)

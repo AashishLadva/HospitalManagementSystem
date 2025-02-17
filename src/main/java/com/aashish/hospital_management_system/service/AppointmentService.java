@@ -10,13 +10,14 @@ import com.aashish.hospital_management_system.repository.AppointmentRepository;
 import com.aashish.hospital_management_system.repository.DoctorRepository;
 import com.aashish.hospital_management_system.repository.PatientRepository;
 import com.aashish.hospital_management_system.service.dto.AppointmentDTO;
+import com.aashish.hospital_management_system.service.dto.response.PaginatedResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -58,26 +59,24 @@ public class AppointmentService {
         return "Appointment booked successfully.";
     }
 
-    // Get all appointments
     @Transactional(readOnly = true)
-    public List<AppointmentDTO> getAllAppointments() {
-        List<Appointment> allAppointments = appointmentRepository.findAll();
-        List<AppointmentDTO> appointmentDTOS = new ArrayList<>();
-        allAppointments.forEach(appointment -> appointmentDTOS.add(new AppointmentDTO(appointment)));
-        return appointmentDTOS;
+    public PaginatedResponse<AppointmentDTO> getAllAppointments(Pageable pageable) {
+        Page<Appointment> allAppointments = appointmentRepository.findAll(pageable);
+        return PaginatedResponse.fromPage(allAppointments.map(AppointmentDTO::new));
     }
 
-    // Get appointments by patient ID
+
     @Transactional(readOnly = true)
-    public List<AppointmentDTO> getAppointmentsByPatientId(Integer patientId) {
-        List<Appointment> allAppointments = appointmentRepository.findAllByPatientId(patientId);
+    public PaginatedResponse<AppointmentDTO> getAppointmentsByPatientId(Integer patientId, Pageable pageable) {
+        Page<Appointment> allAppointments = appointmentRepository.findAllByPatientId(patientId, pageable);
+
         if (allAppointments.isEmpty()) {
             throw new NotFoundException(ExceptionCommonMessages.APPOINTMENT_NOT_FOUND);
         }
-        List<AppointmentDTO> appointmentDTOS = new ArrayList<>();
-        allAppointments.forEach(appointment -> appointmentDTOS.add(new AppointmentDTO(appointment)));
-        return appointmentDTOS;
+
+        return PaginatedResponse.fromPage(allAppointments.map(AppointmentDTO::new));
     }
+
 
     // Approve an appointment
     @Transactional

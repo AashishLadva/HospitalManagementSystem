@@ -8,12 +8,13 @@ import com.aashish.hospital_management_system.entity.User;
 import com.aashish.hospital_management_system.repository.PatientRepository;
 import com.aashish.hospital_management_system.repository.UserRepository;
 import com.aashish.hospital_management_system.service.dto.PatientDTO;
+import com.aashish.hospital_management_system.service.dto.response.PaginatedResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -58,11 +59,14 @@ public class PatientService {
 
     // Get all patients
     @Transactional(readOnly = true)
-    public List<PatientDTO> getAllPatients() {
-        List<Patient> allPatients = patientRepository.findAll();
-        List<PatientDTO> patientDTOs = new ArrayList<>();
-        allPatients.forEach(patientDTO -> patientDTOs.add(new PatientDTO(patientDTO)));
-        return patientDTOs;
+    public PaginatedResponse<PatientDTO> getAllPatients(Pageable pageable) {
+        Page<Patient> patientPage = patientRepository.findAll(pageable); // Fetch paginated data
+
+        // Convert Page<Patient> to Page<PatientDTO>
+        Page<PatientDTO> patientDTOPage = patientPage.map(PatientDTO::new);
+
+        // Convert Page<PatientDTO> to PaginatedResponse<PatientDTO>
+        return PaginatedResponse.fromPage(patientDTOPage);
     }
 
     // Remove a patient by ID

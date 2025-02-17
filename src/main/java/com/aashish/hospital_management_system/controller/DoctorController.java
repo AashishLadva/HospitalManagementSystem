@@ -3,12 +3,13 @@ package com.aashish.hospital_management_system.controller;
 import com.aashish.hospital_management_system.constants.UserPermissions;
 import com.aashish.hospital_management_system.service.DoctorService;
 import com.aashish.hospital_management_system.service.dto.DoctorDTO;
+import com.aashish.hospital_management_system.service.dto.response.PaginatedResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/doctors")
@@ -32,8 +33,10 @@ public class DoctorController {
     // Get all doctors (Accessible to users with 'view_all_doctors' permission)
     @GetMapping("/getAllDoctors")
     @PreAuthorize("hasAuthority('" + UserPermissions.READ_ALL_DOCTOR + "')")
-    public ResponseEntity<List<DoctorDTO>> getAllDoctors() {
-        return ResponseEntity.ok(doctorService.getAllDoctors());
+    public ResponseEntity<PaginatedResponse<DoctorDTO>> getAllDoctors(
+            @PageableDefault Pageable pageable) {
+        PaginatedResponse<DoctorDTO> paginatedDoctors = doctorService.getAllDoctors(pageable);
+        return ResponseEntity.ok(paginatedDoctors);
     }
 
     // Get a doctor by ID (Accessible to users with 'view_all_doctors' permission)

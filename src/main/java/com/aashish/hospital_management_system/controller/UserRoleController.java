@@ -3,11 +3,13 @@ package com.aashish.hospital_management_system.controller;
 import com.aashish.hospital_management_system.constants.UserPermissions;
 import com.aashish.hospital_management_system.service.UserRoleService;
 import com.aashish.hospital_management_system.service.dto.UserRoleDTO;
+import com.aashish.hospital_management_system.service.dto.response.PaginatedResponse;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -28,10 +30,11 @@ public class UserRoleController {
     }
 
     // Get all user-role mappings
-    @GetMapping("getAllUserRoles")
+    @GetMapping("/getAllUserRoles")
     @PreAuthorize("hasAuthority('" + UserPermissions.READ_ALL_USER_ROLES + "')")
-    public ResponseEntity<List<UserRoleDTO>> getAllUserRoles() {
-        return ResponseEntity.ok(userRoleService.getAllUserRoles());
+    public ResponseEntity<PaginatedResponse<UserRoleDTO>> getAllUserRoles(
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(userRoleService.getAllUserRoles(pageable));
     }
 
     // Delete a user-role mapping

@@ -3,12 +3,13 @@ package com.aashish.hospital_management_system.controller;
 import com.aashish.hospital_management_system.constants.UserPermissions;
 import com.aashish.hospital_management_system.entity.Role;
 import com.aashish.hospital_management_system.service.RoleService;
+import com.aashish.hospital_management_system.service.dto.response.PaginatedResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/roles")
@@ -31,8 +32,9 @@ public class RoleController {
     // Get all roles
     @GetMapping("/all")
     @PreAuthorize("hasAuthority('" + UserPermissions.READ_ROLES + "')")
-    public ResponseEntity<List<Role>> getAllRoles() {
-        return ResponseEntity.ok(roleService.getAllRoles());
+    public ResponseEntity<PaginatedResponse<Role>> getAllRoles(
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(roleService.getAllRoles(pageable));
     }
 
     // Get a role by ID

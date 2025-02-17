@@ -1,5 +1,6 @@
 package com.aashish.hospital_management_system.constants;
 
+
 public final class UserPermissions {
 
     public static final String WRITE_APPOINTMENT = "WRITE_APPOINTMENT";
@@ -12,7 +13,7 @@ public final class UserPermissions {
     public static final String WRITE_DOCTOR = "WRITE_DOCTOR";
     public static final String READ_ALL_DOCTOR = "READ_ALL_DOCTOR";
     public static final String READ_DOCTOR = "READ_DOCTOR";
-    
+
     public static final String WRITE_PATIENTS = "WRITE_PATIENTS";
     public static final String READ_OWN_PATIENTS = "READ_OWN_PATIENTS";
     public static final String READ_ALL_PATIENTS = "READ_ALL_PATIENTS";
@@ -27,6 +28,7 @@ public final class UserPermissions {
 
     public static final String WRITE_ROLES_PERMISSIONS = "WRITE_ROLES_PERMISSIONS";
     public static final String READ_ALL_ROLES_PERMISSIONS = "READ_ALL_ROLES_PERMISSIONS";
+    public static final String READ_ROLES_PERMISSIONS = "READ_ROLES_PERMISSIONS";
 
     public static final String READ_USER = "READ_USER";
     public static final String READ_ALL_USERS = "READ_ALL_USERS";
