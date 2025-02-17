@@ -5,7 +5,6 @@ import com.aashish.hospital_management_system.service.AppointmentService;
 import com.aashish.hospital_management_system.service.dto.AppointmentDTO;
 import com.aashish.hospital_management_system.service.dto.response.PaginatedResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -34,9 +33,7 @@ public class AppointmentController {
     @GetMapping("/getAllAppointments")
     @PreAuthorize("hasAuthority('" + UserPermissions.READ_ALL_APPOINTMENTS + "')")
     public PaginatedResponse<AppointmentDTO> getAllAppointments(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size);
+            @PageableDefault Pageable pageable) {
         return appointmentService.getAllAppointments(pageable);
     }
 
